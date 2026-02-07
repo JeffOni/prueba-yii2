@@ -1,0 +1,83 @@
+services:
+  frontend:
+    build:
+      context: frontend
+      args:
+        - PHP_VERSION=8.2
+    ports:
+      - "20080:80"
+    volumes:
+      - ~/.composer-docker/cache:/root/.composer/cache:delegated
+      - ./:/app
+    depends_on:
+      - mysql
+    environment:
+      - DB_HOST=mysql
+      - DB_NAME=${DB_NAME:-inventory_system}
+      - DB_USER=${DB_USER:-yii2user}
+      - DB_PASSWORD=${DB_PASSWORD:-yii2pass}
+    networks:
+      - yii2-network
+
+  backend:
+    build:
+      context: backend
+      args:
+        - PHP_VERSION=8.2
+    ports:
+      - "21080:80"
+    volumes:
+      - ~/.composer-docker/cache:/root/.composer/cache:delegated
+      - ./:/app
+    depends_on:
+      - mysql
+    environment:
+      - DB_HOST=mysql
+      - DB_NAME=${DB_NAME:-inventory_system}
+      - DB_USER=${DB_USER:-yii2user}
+      - DB_PASSWORD=${DB_PASSWORD:-yii2pass}
+    networks:
+      - yii2-network
+
+  mysql:
+    image: mysql:8.0
+    command: --default-authentication-plugin=mysql_native_password
+    environment:
+      - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD:-verysecret}
+      - MYSQL_DATABASE=${DB_NAME:-inventory_system}
+      - MYSQL_USER=${DB_USER:-yii2user}
+      - MYSQL_PASSWORD=${DB_PASSWORD:-yii2pass}
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql-data:/var/lib/mysql
+      - ./docker/mysql/init.sql:/docker-entrypoint-initdb.d/init.sql
+    networks:
+      - yii2-network
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      timeout: 20s
+      retries: 10
+
+  adminer:
+    image: phpmyadmin/phpmyadmin:latest
+    ports:
+      - "8080:80"
+    depends_on:
+      - mysql
+    networks:
+      - yii2-network
+    environment:
+      - PMA_HOST=mysql
+      - PMA_PORT=3306
+      - PMA_USER=yii2user
+      - PMA_PASSWORD=yii2pass
+      - MYSQL_ROOT_PASSWORD=verysecret
+
+volumes:
+  mysql-data:
+    driver: local
+
+networks:
+  yii2-network:
+    driver: bridge
