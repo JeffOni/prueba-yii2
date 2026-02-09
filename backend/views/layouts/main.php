@@ -60,15 +60,6 @@ AppAsset::register($this);
             ];
         }
 
-        // Menú de Roles (solo para administradores)
-        if (Yii::$app->user->can('manageRoles')) {
-            $menuItems[] = [
-                'label' => '<i class="bi bi-shield-lock"></i> Roles',
-                'url' => ['/role/index'],
-                'encode' => false,
-            ];
-        }
-
         if (Yii::$app->user->isGuest) {
             $menuItems[] = ['label' => 'Login', 'url' => ['/site/login']];
         }
