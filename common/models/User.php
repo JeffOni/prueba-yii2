@@ -67,16 +67,27 @@ class User extends ActiveRecord implements IdentityInterface
             // Reglas generales
             ['username', 'trim'],
             ['username', 'string', 'min' => 2, 'max' => 255],
-            ['username', 'unique', 'targetClass' => '\common\models\User', 'message' => 'Este nombre de usuario ya está en uso.'],
+            ['username', 'unique', 'targetClass' => '\common\models\User', 'filter' => function ($query) {
+                if (!$this->isNewRecord) {
+                    $query->andWhere(['!=', 'id', $this->id]);
+                }
+            }, 'message' => 'Este nombre de usuario ya está en uso.'],
             ['username', 'match', 'pattern' => '/^[a-zA-Z0-9_-]+$/', 'message' => 'El nombre de usuario solo puede contener letras, números, guiones y guiones bajos.'],
 
             ['email', 'trim'],
             ['email', 'email'],
             ['email', 'string', 'max' => 255],
-            ['email', 'unique', 'targetClass' => '\common\models\User', 'message' => 'Este email ya está registrado.'],
+            ['email', 'unique', 'targetClass' => '\common\models\User', 'filter' => function ($query) {
+                if (!$this->isNewRecord) {
+                    $query->andWhere(['!=', 'id', $this->id]);
+                }
+            }, 'message' => 'Este email ya está registrado.'],
 
+            // Validación de contraseña
             ['password', 'string', 'min' => 6, 'on' => 'create'],
-            ['password', 'string', 'min' => 6, 'on' => 'update'],
+            ['password', 'string', 'min' => 6, 'when' => function($model) {
+                return !empty($model->password);
+            }, 'on' => 'update'],
 
             ['status', 'default', 'value' => self::STATUS_ACTIVE],
             ['status', 'in', 'range' => [self::STATUS_ACTIVE, self::STATUS_INACTIVE, self::STATUS_DELETED]],

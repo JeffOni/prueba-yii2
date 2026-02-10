@@ -167,13 +167,10 @@ class UserController extends Controller
         $currentRole = !empty($currentRoles) ? array_keys($currentRoles)[0] : null;
 
         if ($this->request->isPost && $model->load($this->request->post())) {
-            // Solo actualizar contraseña si se ingresó una nueva
+            // Solo procesar contraseña si se ingresó una nueva
             if (!empty($model->password)) {
                 $model->setPassword($model->password);
                 $model->generateAuthKey();
-            } else {
-                // Mantener la contraseña anterior
-                unset($model->password);
             }
 
             if ($model->save()) {

@@ -63,8 +63,12 @@ class Product extends ActiveRecord
             [['name'], 'string', 'max' => 255],
             [['sku'], 'string', 'max' => 100],
 
-            // SKU debe ser único
-            [['sku'], 'unique', 'message' => 'Este código SKU ya existe en el sistema.'],
+            // SKU debe ser único (excepto el registro actual al editar)
+            [['sku'], 'unique', 'targetAttribute' => 'sku', 'filter' => function ($query) {
+                if (!$this->isNewRecord) {
+                    $query->andWhere(['!=', 'id', $this->id]);
+                }
+            }, 'message' => 'Este código SKU ya existe en el sistema.'],
 
             // Stock no puede ser negativo
             [['stock'], 'integer', 'min' => 0, 'message' => 'El stock no puede ser negativo.'],
