@@ -12,6 +12,7 @@ Sistema de gestión de inventario desarrollado con **Yii2 Advanced Template** qu
 - [Roles y Permisos](#-roles-y-permisos)
 - [Credenciales de Acceso](#-credenciales-de-acceso)
 - [Uso](#-uso)
+- [Herramientas de Prueba de API](#-herramientas-de-prueba-de-api-opcional)
 - [Estructura del Proyecto](#-estructura-del-proyecto)
 
 ## ✨ Características
@@ -95,6 +96,7 @@ docker-compose up -d
 ```
 
 Esto iniciará los siguientes servicios:
+
 - **Backend**: http://localhost:21080 (Panel de administración)
 - **Frontend**: http://localhost:20080 (Aplicación pública)
 - **phpMyAdmin**: http://localhost:8080 (Gestión de base de datos)
@@ -133,12 +135,12 @@ Los seeders se ejecutan automáticamente con las migraciones e incluyen:
 
 ### Acceso a los Servicios
 
-| Servicio | URL | Puerto |
-|----------|-----|--------|
-| Backend (Admin) | http://localhost:21080 | 21080 |
-| Frontend (Público) | http://localhost:20080 | 20080 |
-| phpMyAdmin | http://localhost:8080 | 8080 |
-| MySQL | localhost:3306 | 3306 |
+| Servicio           | URL                    | Puerto |
+| ------------------ | ---------------------- | ------ |
+| Backend (Admin)    | http://localhost:21080 | 21080  |
+| Frontend (Público) | http://localhost:20080 | 20080  |
+| phpMyAdmin         | http://localhost:8080  | 8080   |
+| MySQL              | localhost:3306         | 3306   |
 
 ### phpMyAdmin
 
@@ -152,49 +154,52 @@ Los seeders se ejecutan automáticamente con las migraciones e incluyen:
 ### Tablas Principales
 
 #### `user`
+
 Almacena información de usuarios del sistema.
 
-| Campo | Tipo | Descripción |
-|-------|------|-------------|
-| id | INT | ID único del usuario |
-| username | VARCHAR(255) | Nombre de usuario único |
-| email | VARCHAR(255) | Correo electrónico único |
-| password_hash | VARCHAR(255) | Contraseña encriptada (bcrypt) |
-| auth_key | VARCHAR(32) | Token para "recordarme" |
-| status | SMALLINT | Estado: 0=Eliminado, 9=Inactivo, 10=Activo |
-| created_at | INT | Timestamp de creación |
-| updated_at | INT | Timestamp de última actualización |
+| Campo         | Tipo         | Descripción                                |
+| ------------- | ------------ | ------------------------------------------ |
+| id            | INT          | ID único del usuario                       |
+| username      | VARCHAR(255) | Nombre de usuario único                    |
+| email         | VARCHAR(255) | Correo electrónico único                   |
+| password_hash | VARCHAR(255) | Contraseña encriptada (bcrypt)             |
+| auth_key      | VARCHAR(32)  | Token para "recordarme"                    |
+| status        | SMALLINT     | Estado: 0=Eliminado, 9=Inactivo, 10=Activo |
+| created_at    | INT          | Timestamp de creación                      |
+| updated_at    | INT          | Timestamp de última actualización          |
 
 #### `product`
+
 Gestiona el inventario de productos.
 
-| Campo | Tipo | Descripción |
-|-------|------|-------------|
-| id | INT | ID único del producto |
-| name | VARCHAR(255) | Nombre del producto |
-| description | TEXT | Descripción detallada |
-| sku | VARCHAR(100) | Código SKU único |
-| price | DECIMAL(10,2) | Precio del producto |
-| stock | INT | Cantidad en inventario |
-| status | SMALLINT | Estado: 0=Inactivo, 1=Activo |
-| created_at | INT | Timestamp de creación |
-| updated_at | INT | Timestamp de última actualización |
+| Campo       | Tipo          | Descripción                       |
+| ----------- | ------------- | --------------------------------- |
+| id          | INT           | ID único del producto             |
+| name        | VARCHAR(255)  | Nombre del producto               |
+| description | TEXT          | Descripción detallada             |
+| sku         | VARCHAR(100)  | Código SKU único                  |
+| price       | DECIMAL(10,2) | Precio del producto               |
+| stock       | INT           | Cantidad en inventario            |
+| status      | SMALLINT      | Estado: 0=Inactivo, 1=Activo      |
+| created_at  | INT           | Timestamp de creación             |
+| updated_at  | INT           | Timestamp de última actualización |
 
 #### `audit_log`
+
 Registra cambios en roles y usuarios para auditoría.
 
-| Campo | Tipo | Descripción |
-|-------|------|-------------|
-| id | INT | ID único del registro |
-| user_id | INT | ID del usuario que realizó la acción |
-| action | VARCHAR(100) | Tipo de acción realizada |
-| table_name | VARCHAR(100) | Tabla afectada |
-| record_id | INT | ID del registro afectado |
-| old_value | TEXT | Valor anterior |
-| new_value | TEXT | Nuevo valor |
-| ip_address | VARCHAR(45) | IP del usuario |
-| user_agent | VARCHAR(255) | Navegador del usuario |
-| created_at | INT | Timestamp de la acción |
+| Campo      | Tipo         | Descripción                          |
+| ---------- | ------------ | ------------------------------------ |
+| id         | INT          | ID único del registro                |
+| user_id    | INT          | ID del usuario que realizó la acción |
+| action     | VARCHAR(100) | Tipo de acción realizada             |
+| table_name | VARCHAR(100) | Tabla afectada                       |
+| record_id  | INT          | ID del registro afectado             |
+| old_value  | TEXT         | Valor anterior                       |
+| new_value  | TEXT         | Nuevo valor                          |
+| ip_address | VARCHAR(45)  | IP del usuario                       |
+| user_agent | VARCHAR(255) | Navegador del usuario                |
+| created_at | INT          | Timestamp de la acción               |
 
 ## 🔐 Roles y Permisos
 
@@ -208,19 +213,19 @@ Admin
 
 ### Permisos por Rol
 
-| Permiso | Admin | Editor | Viewer |
-|---------|-------|--------|--------|
+| Permiso       | Admin | Editor | Viewer |
+| ------------- | ----- | ------ | ------ |
 | **Productos** |
-| viewProduct | ✅ | ✅ | ✅ |
-| createProduct | ✅ | ✅ | ❌ |
-| updateProduct | ✅ | ✅ | ❌ |
-| deleteProduct | ✅ | ❌ | ❌ |
-| **Usuarios** |
-| viewUser | ✅ | ❌ | ❌ |
-| createUser | ✅ | ❌ | ❌ |
-| updateUser | ✅ | ❌ | ❌ |
-| deleteUser | ✅ | ❌ | ❌ |
-| manageRoles | ✅ | ❌ | ❌ |
+| viewProduct   | ✅    | ✅     | ✅     |
+| createProduct | ✅    | ✅     | ❌     |
+| updateProduct | ✅    | ✅     | ❌     |
+| deleteProduct | ✅    | ❌     | ❌     |
+| **Usuarios**  |
+| viewUser      | ✅    | ❌     | ❌     |
+| createUser    | ✅    | ❌     | ❌     |
+| updateUser    | ✅    | ❌     | ❌     |
+| deleteUser    | ✅    | ❌     | ❌     |
+| manageRoles   | ✅    | ❌     | ❌     |
 
 ### Descripción de Roles
 
@@ -289,6 +294,7 @@ Acceder a http://localhost:21080 e iniciar sesión con las credenciales del admi
 #### Asignación de Roles
 
 Al crear o editar un usuario, seleccionar el rol apropiado:
+
 - Admin
 - Editor
 - Viewer
@@ -298,17 +304,63 @@ Los cambios de rol son registrados automáticamente en `audit_log`.
 ### 4. Auditoría
 
 Consultar la tabla `audit_log` en phpMyAdmin para ver:
+
 - Cambios de roles
 - Creación de usuarios
 - Modificaciones de usuarios
 - Eliminaciones de usuarios
 
 Cada registro incluye:
+
 - Usuario que realizó la acción
 - Fecha y hora
 - Dirección IP
 - Navegador utilizado
 - Valores anteriores y nuevos
+
+## 🧪 Herramientas de Prueba de API (Opcional)
+
+El proyecto incluye herramientas auxiliares para facilitar las pruebas de la API RESTful:
+
+### **test-api.html** - Probador Visual de API
+
+Interfaz web interactiva para probar todos los endpoints de la API sin necesidad de Postman.
+
+**Cómo usar:**
+
+1. Abrir el archivo en el navegador: `file:///c:/laragon/www/prueba-yii2/test-api.html`
+2. Hacer clic en "🔑 Obtener Token" (credenciales: admin/Admin123!)
+3. Probar los diferentes endpoints:
+   - Listar productos
+   - Crear producto
+   - Ver producto
+   - Verificar token JWT
+
+**Características:**
+
+- ✅ Interfaz Bootstrap 5 responsive
+- ✅ Muestra respuestas JSON formateadas
+- ✅ Gestión automática de token JWT
+- ✅ Indicadores visuales de éxito/error
+
+### **test-api.sh** - Script Bash para Pruebas
+
+Script bash que ejecuta pruebas automatizadas de la API.
+
+**Cómo usar:**
+
+```bash
+# En WSL o Git Bash
+bash test-api.sh
+```
+
+**Requisitos:**
+
+- `curl` instalado
+- `jq` instalado (opcional, para formatear JSON)
+- Docker corriendo con el backend activo
+
+**Nota:** Estas herramientas son **opcionales** y solo están incluidas para facilitar la evaluación. La documentación formal de la API está en `API_DOCUMENTATION.md`.
 
 ## 📁 Estructura del Proyecto
 
@@ -454,7 +506,7 @@ docker-compose exec backend php yii migrate --interactive=0
 
 ## 👨‍💻 Autor
 
-**Jefferson Pillajo**
+**Jefferson Pozo Bohórquez**
 Prueba Técnica - Yii2 Framework
 GitHub: [@JeffOni](https://github.com/JeffOni)
 

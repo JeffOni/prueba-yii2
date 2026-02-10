@@ -1,0 +1,389 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Probador de API - Sistema de Inventario</title>
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+    <style>
+      .response-box {
+        background: #f8f9fa;
+        border: 1px solid #dee2e6;
+        border-radius: 5px;
+        padding: 15px;
+        margin-top: 10px;
+        font-family: monospace;
+        white-space: pre-wrap;
+        max-height: 400px;
+        overflow-y: auto;
+      }
+      .success {
+        color: #28a745;
+      }
+      .error {
+        color: #dc3545;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container mt-5">
+      <h1 class="mb-4">🧪 Probador de API REST - Sistema de Inventario</h1>
+
+      <div class="alert alert-info">
+        <strong>ℹ️ Instrucciones:</strong> Primero haz login para obtener el
+        token JWT, luego prueba los demás endpoints.
+      </div>
+
+      <!-- LOGIN -->
+      <div class="card mb-4">
+        <div class="card-header bg-primary text-white">
+          <h5>1️⃣ Login (Obtener Token JWT)</h5>
+        </div>
+        <div class="card-body">
+          <form id="loginForm">
+            <div class="row">
+              <div class="col-md-6 mb-3">
+                <label class="form-label">Usuario:</label>
+                <input
+                  type="text"
+                  class="form-control"
+                  id="username"
+                  value="admin"
+                />
+              </div>
+              <div class="col-md-6 mb-3">
+                <label class="form-label">Contraseña:</label>
+                <input
+                  type="password"
+                  class="form-control"
+                  id="password"
+                  value="Admin123!"
+                />
+              </div>
+            </div>
+            <button type="submit" class="btn btn-primary">
+              🔑 Obtener Token
+            </button>
+          </form>
+          <div id="loginResponse" class="response-box mt-3"></div>
+        </div>
+      </div>
+
+      <!-- TOKEN DISPLAY -->
+      <div class="card mb-4" id="tokenCard" style="display: none">
+        <div class="card-header bg-success text-white">
+          <h5>✅ Token JWT Activo</h5>
+        </div>
+        <div class="card-body">
+          <div class="input-group">
+            <input
+              type="text"
+              class="form-control"
+              id="tokenDisplay"
+              readonly
+            />
+            <button class="btn btn-outline-secondary" onclick="copyToken()">
+              📋 Copiar
+            </button>
+          </div>
+          <small class="text-muted">Expira en 1 hora</small>
+        </div>
+      </div>
+
+      <!-- LISTAR PRODUCTOS -->
+      <div class="card mb-4">
+        <div class="card-header bg-info text-white">
+          <h5>2️⃣ Listar Productos (GET /api/v1/products)</h5>
+        </div>
+        <div class="card-body">
+          <button onclick="getProducts()" class="btn btn-info">
+            📦 Obtener Lista de Productos
+          </button>
+          <div id="productsResponse" class="response-box mt-3"></div>
+        </div>
+      </div>
+
+      <!-- CREAR PRODUCTO -->
+      <div class="card mb-4">
+        <div class="card-header bg-success text-white">
+          <h5>3️⃣ Crear Producto (POST /api/v1/products)</h5>
+        </div>
+        <div class="card-body">
+          <form id="createProductForm">
+            <div class="row">
+              <div class="col-md-6 mb-3">
+                <label class="form-label">Nombre:</label>
+                <input
+                  type="text"
+                  class="form-control"
+                  id="productName"
+                  value="Producto desde API"
+                  required
+                />
+              </div>
+              <div class="col-md-6 mb-3">
+                <label class="form-label">SKU:</label>
+                <input
+                  type="text"
+                  class="form-control"
+                  id="productSku"
+                  value="API-TEST-001"
+                  required
+                />
+              </div>
+              <div class="col-md-6 mb-3">
+                <label class="form-label">Precio:</label>
+                <input
+                  type="number"
+                  step="0.01"
+                  class="form-control"
+                  id="productPrice"
+                  value="99.99"
+                  required
+                />
+              </div>
+              <div class="col-md-6 mb-3">
+                <label class="form-label">Stock:</label>
+                <input
+                  type="number"
+                  class="form-control"
+                  id="productStock"
+                  value="50"
+                  required
+                />
+              </div>
+              <div class="col-12 mb-3">
+                <label class="form-label">Descripción:</label>
+                <textarea class="form-control" id="productDesc" rows="2">
+Producto creado mediante la API REST</textarea
+                >
+              </div>
+            </div>
+            <button type="submit" class="btn btn-success">
+              ➕ Crear Producto
+            </button>
+          </form>
+          <div id="createResponse" class="response-box mt-3"></div>
+        </div>
+      </div>
+
+      <!-- VER PRODUCTO -->
+      <div class="card mb-4">
+        <div class="card-header bg-warning">
+          <h5>4️⃣ Ver Producto (GET /api/v1/products/{id})</h5>
+        </div>
+        <div class="card-body">
+          <div class="input-group mb-3">
+            <input
+              type="number"
+              class="form-control"
+              id="viewProductId"
+              value="1"
+              placeholder="ID del producto"
+            />
+            <button class="btn btn-warning" onclick="viewProduct()">
+              👁️ Ver Producto
+            </button>
+          </div>
+          <div id="viewResponse" class="response-box"></div>
+        </div>
+      </div>
+
+      <!-- VERIFICAR TOKEN -->
+      <div class="card mb-4">
+        <div class="card-header bg-secondary text-white">
+          <h5>5️⃣ Verificar Token (POST /api/v1/auth/verify)</h5>
+        </div>
+        <div class="card-body">
+          <button onclick="verifyToken()" class="btn btn-secondary">
+            🔍 Verificar Token JWT
+          </button>
+          <div id="verifyResponse" class="response-box mt-3"></div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      const API_URL = "http://localhost:21080/api/v1";
+      let currentToken = "";
+
+      // LOGIN
+      document
+        .getElementById("loginForm")
+        .addEventListener("submit", async (e) => {
+          e.preventDefault();
+          const username = document.getElementById("username").value;
+          const password = document.getElementById("password").value;
+
+          try {
+            const response = await fetch(`${API_URL}/auth/login`, {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ username, password }),
+            });
+
+            const data = await response.json();
+            document.getElementById("loginResponse").innerHTML = JSON.stringify(
+              data,
+              null,
+              2,
+            );
+            document.getElementById("loginResponse").className =
+              "response-box success";
+
+            if (data.success && data.data.token) {
+              currentToken = data.data.token;
+              document.getElementById("tokenDisplay").value = currentToken;
+              document.getElementById("tokenCard").style.display = "block";
+            }
+          } catch (error) {
+            document.getElementById("loginResponse").innerHTML =
+              "Error: " + error.message;
+            document.getElementById("loginResponse").className =
+              "response-box error";
+          }
+        });
+
+      // LISTAR PRODUCTOS
+      async function getProducts() {
+        if (!currentToken) {
+          alert("Primero debes hacer login para obtener el token");
+          return;
+        }
+
+        try {
+          const response = await fetch(`${API_URL}/products`, {
+            headers: { Authorization: `Bearer ${currentToken}` },
+          });
+
+          const data = await response.json();
+          document.getElementById("productsResponse").innerHTML =
+            JSON.stringify(data, null, 2);
+          document.getElementById("productsResponse").className =
+            "response-box success";
+        } catch (error) {
+          document.getElementById("productsResponse").innerHTML =
+            "Error: " + error.message;
+          document.getElementById("productsResponse").className =
+            "response-box error";
+        }
+      }
+
+      // CREAR PRODUCTO
+      document
+        .getElementById("createProductForm")
+        .addEventListener("submit", async (e) => {
+          e.preventDefault();
+
+          if (!currentToken) {
+            alert("Primero debes hacer login para obtener el token");
+            return;
+          }
+
+          const product = {
+            name: document.getElementById("productName").value,
+            sku: document.getElementById("productSku").value,
+            price: parseFloat(document.getElementById("productPrice").value),
+            stock: parseInt(document.getElementById("productStock").value),
+            description: document.getElementById("productDesc").value,
+            status: 1,
+          };
+
+          try {
+            const response = await fetch(`${API_URL}/products`, {
+              method: "POST",
+              headers: {
+                Authorization: `Bearer ${currentToken}`,
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify(product),
+            });
+
+            const data = await response.json();
+            document.getElementById("createResponse").innerHTML =
+              JSON.stringify(data, null, 2);
+            document.getElementById("createResponse").className = response.ok
+              ? "response-box success"
+              : "response-box error";
+          } catch (error) {
+            document.getElementById("createResponse").innerHTML =
+              "Error: " + error.message;
+            document.getElementById("createResponse").className =
+              "response-box error";
+          }
+        });
+
+      // VER PRODUCTO
+      async function viewProduct() {
+        if (!currentToken) {
+          alert("Primero debes hacer login para obtener el token");
+          return;
+        }
+
+        const id = document.getElementById("viewProductId").value;
+
+        try {
+          const response = await fetch(`${API_URL}/products/${id}`, {
+            headers: { Authorization: `Bearer ${currentToken}` },
+          });
+
+          const data = await response.json();
+          document.getElementById("viewResponse").innerHTML = JSON.stringify(
+            data,
+            null,
+            2,
+          );
+          document.getElementById("viewResponse").className = response.ok
+            ? "response-box success"
+            : "response-box error";
+        } catch (error) {
+          document.getElementById("viewResponse").innerHTML =
+            "Error: " + error.message;
+          document.getElementById("viewResponse").className =
+            "response-box error";
+        }
+      }
+
+      // VERIFICAR TOKEN
+      async function verifyToken() {
+        if (!currentToken) {
+          alert("Primero debes hacer login para obtener el token");
+          return;
+        }
+
+        try {
+          const response = await fetch(`${API_URL}/auth/verify`, {
+            method: "POST",
+            headers: { Authorization: `Bearer ${currentToken}` },
+          });
+
+          const data = await response.json();
+          document.getElementById("verifyResponse").innerHTML = JSON.stringify(
+            data,
+            null,
+            2,
+          );
+          document.getElementById("verifyResponse").className = response.ok
+            ? "response-box success"
+            : "response-box error";
+        } catch (error) {
+          document.getElementById("verifyResponse").innerHTML =
+            "Error: " + error.message;
+          document.getElementById("verifyResponse").className =
+            "response-box error";
+        }
+      }
+
+      // COPIAR TOKEN
+      function copyToken() {
+        const tokenInput = document.getElementById("tokenDisplay");
+        tokenInput.select();
+        document.execCommand("copy");
+        alert("Token copiado al portapapeles!");
+      }
+    </script>
+  </body>
+</html>

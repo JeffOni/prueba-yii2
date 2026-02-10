@@ -59,13 +59,13 @@ $this->params['breadcrumbs'][] = $this->title;
                                 'attribute' => 'status',
                                 'format' => 'html',
                                 'value' => function ($model) {
-                                    $statusLabels = [
-                                        User::STATUS_ACTIVE => '<span class="badge bg-success"><i class="bi bi-check-circle-fill"></i> Activo</span>',
-                                        User::STATUS_INACTIVE => '<span class="badge bg-warning"><i class="bi bi-pause-circle-fill"></i> Inactivo</span>',
-                                        User::STATUS_DELETED => '<span class="badge bg-danger"><i class="bi bi-x-circle-fill"></i> Eliminado</span>',
-                                    ];
-                                    return $statusLabels[$model->status] ?? '<span class="badge bg-secondary">Desconocido</span>';
-                                },
+                                        $statusLabels = [
+                                            User::STATUS_ACTIVE => '<span class="badge bg-success"><i class="bi bi-check-circle-fill"></i> Activo</span>',
+                                            User::STATUS_INACTIVE => '<span class="badge bg-warning"><i class="bi bi-pause-circle-fill"></i> Inactivo</span>',
+                                            User::STATUS_DELETED => '<span class="badge bg-danger"><i class="bi bi-x-circle-fill"></i> Eliminado</span>',
+                                        ];
+                                        return $statusLabels[$model->status] ?? '<span class="badge bg-secondary">Desconocido</span>';
+                                    },
                             ],
                             [
                                 'attribute' => 'created_at',
@@ -132,7 +132,8 @@ $this->params['breadcrumbs'][] = $this->title;
                             <div class="list-group">
                                 <?php foreach ($permissions as $permissionName => $description): ?>
                                     <div class="list-group-item list-group-item-action">
-                                        <small class="text-muted"><i class="bi bi-key-fill"></i> <?= Html::encode($permissionName) ?></small>
+                                        <small class="text-muted"><i class="bi bi-key-fill"></i>
+                                            <?= Html::encode($permissionName) ?></small>
                                     </div>
                                 <?php endforeach; ?>
                             </div>

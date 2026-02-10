@@ -162,13 +162,113 @@ class m260206_223424_seed_sample_products extends Migration
                 'created_at' => $now,
                 'updated_at' => $now,
             ],
+            [
+                'name' => 'Memoria RAM DDR4 16GB',
+                'description' => 'Memoria RAM Corsair Vengeance DDR4 3200MHz 16GB (2x8GB)',
+                'sku' => 'COMP-016',
+                'price' => 79.99,
+                'stock' => 30,
+                'status' => 1,
+                'created_at' => $now,
+                'updated_at' => $now,
+            ],
+            [
+                'name' => 'SSD NVMe 1TB Samsung',
+                'description' => 'Disco SSD NVMe M.2 1TB, velocidades hasta 3500MB/s',
+                'sku' => 'STOR-017',
+                'price' => 119.99,
+                'stock' => 22,
+                'status' => 1,
+                'created_at' => $now,
+                'updated_at' => $now,
+            ],
+            [
+                'name' => 'Fuente de Poder 650W',
+                'description' => 'Fuente modular 80 Plus Gold, certificada para gaming',
+                'sku' => 'COMP-018',
+                'price' => 89.99,
+                'stock' => 15,
+                'status' => 1,
+                'created_at' => $now,
+                'updated_at' => $now,
+            ],
+            [
+                'name' => 'Tarjeta Gráfica RTX 3070',
+                'description' => 'GPU NVIDIA GeForce RTX 3070 8GB GDDR6',
+                'sku' => 'GAME-019',
+                'price' => 599.99,
+                'stock' => 4,
+                'status' => 1,
+                'created_at' => $now,
+                'updated_at' => $now,
+            ],
+            [
+                'name' => 'Micrófono USB Profesional',
+                'description' => 'Micrófono condensador USB con brazo articulado y antipop',
+                'sku' => 'AUDIO-020',
+                'price' => 129.99,
+                'stock' => 18,
+                'status' => 1,
+                'created_at' => $now,
+                'updated_at' => $now,
+            ],
+            [
+                'name' => 'Tablet Android 10 pulgadas',
+                'description' => 'Tablet Samsung Galaxy Tab con S-Pen, 64GB',
+                'sku' => 'MOBILE-021',
+                'price' => 349.99,
+                'stock' => 10,
+                'status' => 1,
+                'created_at' => $now,
+                'updated_at' => $now,
+            ],
+            [
+                'name' => 'Smart Watch Deportivo',
+                'description' => 'Reloj inteligente con GPS, monitor cardíaco y resistencia al agua',
+                'sku' => 'WEAR-022',
+                'price' => 199.99,
+                'stock' => 25,
+                'status' => 1,
+                'created_at' => $now,
+                'updated_at' => $now,
+            ],
+            [
+                'name' => 'Cargador Inalámbrico Rápido',
+                'description' => 'Base de carga inalámbrica Qi 15W, compatible con iPhone y Android',
+                'sku' => 'ACC-023',
+                'price' => 29.99,
+                'stock' => 50,
+                'status' => 1,
+                'created_at' => $now,
+                'updated_at' => $now,
+            ],
+            [
+                'name' => 'Bocina Bluetooth Portátil',
+                'description' => 'Altavoz Bluetooth resistente al agua, 12 horas de batería',
+                'sku' => 'AUDIO-024',
+                'price' => 59.99,
+                'stock' => 35,
+                'status' => 1,
+                'created_at' => $now,
+                'updated_at' => $now,
+            ],
+            [
+                'name' => 'Soporte para Laptop Ajustable',
+                'description' => 'Soporte ergonómico de aluminio para laptop, altura ajustable',
+                'sku' => 'ACC-025',
+                'price' => 39.99,
+                'stock' => 45,
+                'status' => 1,
+                'created_at' => $now,
+                'updated_at' => $now,
+            ],
         ];
 
         foreach ($products as $product) {
             $this->insert('{{%product}}', $product);
         }
 
-        echo "15 productos de ejemplo creados exitosamente.\n";
+        echo "25 productos de ejemplo creados exitosamente (para demostrar paginación).\n";
     }
 
     /**
@@ -192,14 +292,24 @@ class m260206_223424_seed_sample_products extends Migration
             'GAME-012',
             'ACC-013',
             'ACC-014',
-            'CLEAN-015'
+            'CLEAN-015',
+            'COMP-016',
+            'STOR-017',
+            'COMP-018',
+            'GAME-019',
+            'AUDIO-020',
+            'MOBILE-021',
+            'WEAR-022',
+            'ACC-023',
+            'AUDIO-024',
+            'ACC-025'
         ];
 
         foreach ($skus as $sku) {
             $this->delete('{{%product}}', ['sku' => $sku]);
         }
 
-        echo "15 productos de ejemplo eliminados.\n";
+        echo "25 productos de ejemplo eliminados.\n";
         return true;
     }
 

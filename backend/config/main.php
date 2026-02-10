@@ -12,7 +12,11 @@ return [
     'basePath' => dirname(__DIR__),
     'controllerNamespace' => 'backend\controllers',
     'bootstrap' => ['log'],
-    'modules' => [],
+    'modules' => [
+        'api' => [
+            'class' => 'common\modules\api\v1\Module',
+        ],
+    ],
     'components' => [
         'request' => [
             'csrfParam' => '_csrf-backend',
@@ -45,6 +49,21 @@ return [
             'enablePrettyUrl' => true,
             'showScriptName' => false,
             'rules' => [
+                // Rutas de la API
+                'POST api/v1/auth/login' => 'api/auth/login',
+                'POST api/v1/auth/verify' => 'api/auth/verify',
+
+                [
+                    'class' => 'yii\rest\UrlRule',
+                    'controller' => ['api/v1/product'],
+                    'extraPatterns' => [
+                        'GET search' => 'search',
+                    ],
+                ],
+                [
+                    'class' => 'yii\rest\UrlRule',
+                    'controller' => ['api/v1/user'],
+                ],
             ],
         ],
     ],

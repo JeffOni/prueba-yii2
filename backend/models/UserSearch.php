@@ -79,7 +79,7 @@ class UserSearch extends User
         ]);
 
         $query->andFilterWhere(['like', 'username', $this->username])
-              ->andFilterWhere(['like', 'email', $this->email]);
+            ->andFilterWhere(['like', 'email', $this->email]);
 
         // Filtrar por rol si se especificó
         if ($this->role) {

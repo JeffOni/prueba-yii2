@@ -112,8 +112,8 @@ foreach ($roles as $role) {
             ) ?>
             <?= Html::submitButton(
                 $model->isNewRecord
-                    ? '<i class="bi bi-check-circle-fill"></i> Crear Usuario'
-                    : '<i class="bi bi-check-circle-fill"></i> Guardar Cambios',
+                ? '<i class="bi bi-check-circle-fill"></i> Crear Usuario'
+                : '<i class="bi bi-check-circle-fill"></i> Guardar Cambios',
                 ['class' => 'btn btn-success']
             ) ?>
         </div>
