@@ -11,6 +11,10 @@ use common\models\Product;
  */
 class ProductSearch extends Product
 {
+    // Atributos adicionales para filtro de rango de precio
+    public $price_min;
+    public $price_max;
+
     /**
      * {@inheritdoc}
      */
@@ -19,7 +23,7 @@ class ProductSearch extends Product
         return [
             [['id', 'stock', 'status'], 'integer'],
             [['name', 'description', 'sku'], 'safe'],
-            [['price'], 'number'],
+            [['price', 'price_min', 'price_max'], 'number'],
         ];
     }
 
@@ -75,9 +79,12 @@ class ProductSearch extends Product
             ->andFilterWhere(['like', 'description', $this->description])
             ->andFilterWhere(['like', 'sku', $this->sku]);
 
-        // Filtro de rango de precio (opcional)
-        if ($this->price !== null && $this->price !== '') {
-            $query->andFilterWhere(['<=', 'price', $this->price]);
+        // Filtro de rango de precio (RF-07)
+        if ($this->price_min !== null && $this->price_min !== '') {
+            $query->andWhere(['>=', 'price', $this->price_min]);
+        }
+        if ($this->price_max !== null && $this->price_max !== '') {
+            $query->andWhere(['<=', 'price', $this->price_max]);
         }
 
         return $dataProvider;

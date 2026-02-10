@@ -60,7 +60,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 'headerOptions' => ['style' => 'width: 150px'],
             ],
 
-            // Precio (ordenable, sin filtro)
+            // Precio (ordenable, con filtro de rango)
             [
                 'attribute' => 'price',
                 'format' => 'html',
@@ -68,7 +68,20 @@ $this->params['breadcrumbs'][] = $this->title;
                         return '<span class="badge bg-primary fs-6">' . $model->getFormattedPrice() . '</span>';
                     },
                 'headerOptions' => ['style' => 'width: 130px'],
-                'filter' => false,
+                'filter' => '<div class="input-group input-group-sm">
+                    <span class="input-group-text">$</span>' .
+                    Html::activeTextInput($searchModel, 'price_min', [
+                        'class' => 'form-control',
+                        'placeholder' => 'Mín',
+                        'style' => 'max-width: 70px;',
+                    ]) . '
+                    <span class="input-group-text">-</span>' .
+                    Html::activeTextInput($searchModel, 'price_max', [
+                        'class' => 'form-control',
+                        'placeholder' => 'Máx',
+                        'style' => 'max-width: 70px;',
+                    ]) . '
+                </div>',
             ],
 
             // Stock (ordenable, con filtro numérico)

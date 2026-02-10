@@ -115,21 +115,28 @@ class UserController extends Controller
                 $model->status = User::STATUS_ACTIVE;
 
                 if ($model->save()) {
-                    // Asignar rol si fue seleccionado
-                    $role = $this->request->post('User')['role'] ?? null;
-                    if ($role) {
+                    // Asignar roles si fueron seleccionados (múltiples)
+                    $roles = $this->request->post('User')['roles'] ?? [];
+                    if (!empty($roles)) {
                         $auth = Yii::$app->authManager;
-                        $roleObject = $auth->getRole($role);
-                        if ($roleObject) {
-                            $auth->assign($roleObject, $model->id);
+                        $assignedRoles = [];
 
-                            // Registrar en audit log
+                        foreach ($roles as $roleName) {
+                            $roleObject = $auth->getRole($roleName);
+                            if ($roleObject) {
+                                $auth->assign($roleObject, $model->id);
+                                $assignedRoles[] = $roleName;
+                            }
+                        }
+
+                        // Registrar en audit log todos los roles asignados
+                        if (!empty($assignedRoles)) {
                             $this->logAudit(
-                                'assign_role',
+                                'assign_roles',
                                 'user',
                                 $model->id,
                                 null,
-                                "Rol '{$role}' asignado al usuario {$model->username}"
+                                "Roles asignados: " . implode(', ', $assignedRoles) . " al usuario {$model->username}"
                             );
                         }
                     }
@@ -161,10 +168,10 @@ class UserController extends Controller
         $model = $this->findModel($id);
         $model->scenario = 'update';
 
-        // Obtener rol actual del usuario
+        // Obtener roles actuales del usuario (todos)
         $auth = Yii::$app->authManager;
-        $currentRoles = $auth->getRolesByUser($id);
-        $currentRole = !empty($currentRoles) ? array_keys($currentRoles)[0] : null;
+        $currentRolesObjects = $auth->getRolesByUser($id);
+        $currentRoles = array_keys($currentRolesObjects);
 
         if ($this->request->isPost && $model->load($this->request->post())) {
             // Solo actualizar contraseña si se ingresó una nueva
@@ -177,34 +184,41 @@ class UserController extends Controller
             }
 
             if ($model->save()) {
-                // Actualizar rol si cambió
-                $newRole = $this->request->post('User')['role'] ?? null;
+                // Actualizar roles si cambiaron
+                $newRoles = $this->request->post('User')['roles'] ?? [];
 
-                if ($newRole !== $currentRole) {
-                    // Revocar rol anterior
-                    if ($currentRole) {
-                        $oldRoleObject = $auth->getRole($currentRole);
-                        if ($oldRoleObject) {
-                            $auth->revoke($oldRoleObject, $model->id);
-                        }
+                // Determinar qué roles agregar y cuáles revocar
+                $rolesToRevoke = array_diff($currentRoles, $newRoles);
+                $rolesToAssign = array_diff($newRoles, $currentRoles);
+
+                // Revocar roles que ya no están seleccionados
+                foreach ($rolesToRevoke as $roleName) {
+                    $roleObject = $auth->getRole($roleName);
+                    if ($roleObject) {
+                        $auth->revoke($roleObject, $model->id);
                     }
+                }
 
-                    // Asignar nuevo rol
-                    if ($newRole) {
-                        $newRoleObject = $auth->getRole($newRole);
-                        if ($newRoleObject) {
-                            $auth->assign($newRoleObject, $model->id);
-
-                            // Registrar cambio en audit log
-                            $this->logAudit(
-                                'change_role',
-                                'user',
-                                $model->id,
-                                "Rol anterior: {$currentRole}",
-                                "Nuevo rol: {$newRole}"
-                            );
-                        }
+                // Asignar nuevos roles
+                foreach ($rolesToAssign as $roleName) {
+                    $roleObject = $auth->getRole($roleName);
+                    if ($roleObject) {
+                        $auth->assign($roleObject, $model->id);
                     }
+                }
+
+                // Registrar cambio en audit log si hubo cambios
+                if (!empty($rolesToRevoke) || !empty($rolesToAssign)) {
+                    $oldRolesText = !empty($currentRoles) ? implode(', ', $currentRoles) : 'Sin roles';
+                    $newRolesText = !empty($newRoles) ? implode(', ', $newRoles) : 'Sin roles';
+
+                    $this->logAudit(
+                        'change_roles',
+                        'user',
+                        $model->id,
+                        "Roles anteriores: {$oldRolesText}",
+                        "Nuevos roles: {$newRolesText}"
+                    );
                 }
 
                 Yii::$app->session->setFlash('success', 'Usuario actualizado exitosamente.');
@@ -216,7 +230,7 @@ class UserController extends Controller
 
         return $this->render('update', [
             'model' => $model,
-            'currentRole' => $currentRole,
+            'currentRoles' => $currentRoles,
         ]);
     }
 

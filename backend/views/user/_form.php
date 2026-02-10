@@ -63,19 +63,32 @@ foreach ($roles as $role) {
                 </div>
                 <div class="card-body">
                     <?php
-                    // Campo de selección de rol
+                    // Campo de selección de roles (múltiples)
                     echo '<div class="form-group">';
-                    echo Html::label('<i class="bi bi-shield-fill"></i> Rol del Usuario', 'user-role', ['class' => 'form-label']);
+                    echo Html::label('<i class="bi bi-shield-fill"></i> Roles del Usuario', 'user-roles', ['class' => 'form-label']);
 
-                    $selectedRole = $currentRole ?? null;
-                    if ($model->isNewRecord && !$selectedRole) {
-                        $selectedRole = 'Viewer'; // Rol por defecto para nuevos usuarios
+                    $selectedRoles = $currentRoles ?? [];
+                    if ($model->isNewRecord && empty($selectedRoles)) {
+                        $selectedRoles = ['Viewer']; // Rol por defecto para nuevos usuarios
                     }
 
-                    echo Html::dropDownList('User[role]', $selectedRole, $roleList, [
-                        'class' => 'form-select',
-                        'prompt' => 'Seleccione un rol...',
-                        'id' => 'user-role',
+                    echo Html::checkboxList('User[roles]', $selectedRoles, $roleList, [
+                        'class' => 'role-checkbox',
+                        'item' => function($index, $label, $name, $checked, $value) {
+                            $checkedAttr = $checked ? 'checked' : '';
+                            $badgeClass = [
+                                'Admin' => 'bg-danger',
+                                'Editor' => 'bg-warning',
+                                'Viewer' => 'bg-info',
+                            ][$value] ?? 'bg-secondary';
+
+                            return '<div class="form-check mb-2">
+                                <input type="checkbox" id="role-' . $value . '" name="' . $name . '" value="' . $value . '" class="form-check-input" ' . $checkedAttr . '>
+                                <label class="form-check-label" for="role-' . $value . '">
+                                    <span class="badge ' . $badgeClass . '">' . Html::encode($label) . '</span>
+                                </label>
+                            </div>';
+                        },
                     ]);
 
                     echo '<div class="form-text">
@@ -85,6 +98,7 @@ foreach ($roles as $role) {
                                 <li><strong>Editor:</strong> Puede crear y modificar productos</li>
                                 <li><strong>Viewer:</strong> Solo puede ver productos</li>
                             </ul>
+                            <p class="text-muted mt-2"><i class="bi bi-info-circle"></i> Puede seleccionar múltiples roles para el usuario.</p>
                         </small>
                     </div>';
                     echo '</div>';
@@ -141,30 +155,14 @@ $this->registerJs("
             return false;
         }
 
+        // Validar que al menos un rol esté seleccionado
+        var rolesChecked = $('input[name=\"User[roles][]\"]').is(':checked');
+        if (!rolesChecked) {
+            alert('Debe seleccionar al menos un rol para el usuario.');
+            return false;
+        }
+
         return true;
     });
-
-    // Resaltar el rol seleccionado con colores
-    $('#user-role').on('change', function() {
-        var role = $(this).val();
-        var badge = '';
-
-        switch(role) {
-            case 'Admin':
-                $(this).removeClass().addClass('form-select bg-danger bg-opacity-10');
-                break;
-            case 'Editor':
-                $(this).removeClass().addClass('form-select bg-warning bg-opacity-10');
-                break;
-            case 'Viewer':
-                $(this).removeClass().addClass('form-select bg-info bg-opacity-10');
-                break;
-            default:
-                $(this).removeClass().addClass('form-select');
-        }
-    });
-
-    // Trigger inicial
-    $('#user-role').trigger('change');
 ");
 ?>
