@@ -10,14 +10,23 @@ services:
       - ~/.composer-docker/cache:/root/.composer/cache:delegated
       - ./:/app
     depends_on:
-      - mysql
+      mysql:
+        condition: service_healthy
     environment:
       - DB_HOST=mysql
       - DB_NAME=${DB_NAME:-inventory_system}
       - DB_USER=${DB_USER:-yii2user}
       - DB_PASSWORD=${DB_PASSWORD:-yii2pass}
+      - JWT_SECRET_KEY=${JWT_SECRET_KEY:-your-jwt-secret-key-here}
+      - JWT_EXPIRE_TIME=${JWT_EXPIRE_TIME:-3600}
     networks:
       - yii2-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost/"]
+      interval: 30s
+      timeout: 3s
+      retries: 3
+      start_period: 40s
 
   backend:
     build:
@@ -30,14 +39,23 @@ services:
       - ~/.composer-docker/cache:/root/.composer/cache:delegated
       - ./:/app
     depends_on:
-      - mysql
+      mysql:
+        condition: service_healthy
     environment:
       - DB_HOST=mysql
       - DB_NAME=${DB_NAME:-inventory_system}
       - DB_USER=${DB_USER:-yii2user}
       - DB_PASSWORD=${DB_PASSWORD:-yii2pass}
+      - JWT_SECRET_KEY=${JWT_SECRET_KEY:-your-jwt-secret-key-here}
+      - JWT_EXPIRE_TIME=${JWT_EXPIRE_TIME:-3600}
     networks:
       - yii2-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost/"]
+      interval: 30s
+      timeout: 3s
+      retries: 3
+      start_period: 40s
 
   mysql:
     image: mysql:8.0
@@ -55,24 +73,27 @@ services:
     networks:
       - yii2-network
     healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
-      timeout: 20s
-      retries: 10
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u${DB_USER:-yii2user}", "-p${DB_PASSWORD:-yii2pass}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
 
   adminer:
     image: phpmyadmin/phpmyadmin:latest
     ports:
       - "8080:80"
     depends_on:
-      - mysql
+      mysql:
+        condition: service_healthy
     networks:
       - yii2-network
     environment:
       - PMA_HOST=mysql
       - PMA_PORT=3306
-      - PMA_USER=yii2user
-      - PMA_PASSWORD=yii2pass
-      - MYSQL_ROOT_PASSWORD=verysecret
+      - PMA_USER=${DB_USER:-yii2user}
+      - PMA_PASSWORD=${DB_PASSWORD:-yii2pass}
+      - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD:-verysecret}
 
 volumes:
   mysql-data:
