@@ -23,6 +23,58 @@ AppAsset::register($this);
     <title><?= Html::encode($this->title) ?></title>
     <!-- Bootstrap Icons -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.2/font/bootstrap-icons.css">
+    <style>
+        /* Estilos personalizados para paginación */
+        .pagination {
+            margin: 20px 0;
+            gap: 5px;
+        }
+
+        .pagination .page-item {
+            margin: 0 2px;
+        }
+
+        .pagination .page-link {
+            border-radius: 6px;
+            padding: 8px 14px;
+            font-weight: 500;
+            color: #0d6efd;
+            border: 1px solid #dee2e6;
+            transition: all 0.3s ease;
+        }
+
+        .pagination .page-link:hover {
+            background-color: #0d6efd;
+            border-color: #0d6efd;
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(13, 110, 253, 0.2);
+        }
+
+        .pagination .page-item.active .page-link {
+            background-color: #0d6efd;
+            border-color: #0d6efd;
+            color: white;
+            font-weight: 600;
+            box-shadow: 0 4px 8px rgba(13, 110, 253, 0.3);
+        }
+
+        .pagination .page-item.disabled .page-link {
+            background-color: #e9ecef;
+            border-color: #dee2e6;
+            color: #6c757d;
+            cursor: not-allowed;
+        }
+
+        .pagination .page-link:focus {
+            box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+        }
+
+        /* Mejora de spacing en summary */
+        .summary {
+            font-size: 0.95rem;
+        }
+    </style>
     <?php $this->head() ?>
 </head>
 

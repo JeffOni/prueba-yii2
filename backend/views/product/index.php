@@ -25,6 +25,14 @@ $this->params['breadcrumbs'][] = $this->title;
         'dataProvider' => $dataProvider,
         'filterModel' => $searchModel,
         'tableOptions' => ['class' => 'table table-striped table-hover'],
+        'pager' => [
+            'class' => 'yii\bootstrap5\LinkPager',
+            'options' => ['class' => 'pagination justify-content-center'],
+            'linkOptions' => ['class' => 'page-link'],
+            'activePageCssClass' => 'active',
+            'disabledPageCssClass' => 'disabled',
+            'maxButtonCount' => 5,
+        ],
         'columns' => [
             ['class' => 'yii\grid\SerialColumn'],
 
@@ -134,8 +142,10 @@ $this->params['breadcrumbs'][] = $this->title;
                 ],
             ],
         ],
-        'summary' => '<div class="text-muted mb-3">Mostrando {begin}-{end} de {totalCount} productos</div>',
-        'emptyText' => '<div class="alert alert-info">No se encontraron productos.</div>',
+        'summary' => '<div class="d-flex justify-content-between align-items-center my-3">
+            <span class="text-muted"><i class="bi bi-info-circle"></i> Mostrando {begin}-{end} de {totalCount} productos</span>
+        </div>',
+        'emptyText' => '<div class="alert alert-info"><i class="bi bi-inbox"></i> No se encontraron productos.</div>',
     ]); ?>
 
 </div>
