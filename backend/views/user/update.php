@@ -4,7 +4,7 @@ use yii\helpers\Html;
 
 /** @var yii\web\View $this */
 /** @var common\models\User $model */
-/** @var string|null $currentRole */
+/** @var array $currentRoles */
 
 $this->title = 'Actualizar Usuario: ' . $model->username;
 $this->params['breadcrumbs'][] = ['label' => 'Usuarios', 'url' => ['index']];
@@ -24,12 +24,12 @@ $this->params['breadcrumbs'][] = 'Actualizar';
         <?php if ($model->id == 1): ?>
             <br><strong>Este es el usuario administrador principal del sistema.</strong>
         <?php endif; ?>
-        Cualquier cambio en el rol será registrado en el sistema de auditoría.
+        Cualquier cambio en los roles será registrado en el sistema de auditoría.
     </div>
 
     <?= $this->render('_form', [
         'model' => $model,
-        'currentRole' => $currentRole,
+        'currentRoles' => $currentRoles,
     ]) ?>
 
 </div>
