@@ -4,9 +4,9 @@ return [
     'components' => [
         'db' => [
             'class' => \yii\db\Connection::class,
-            'dsn' => 'mysql:host=mysql;dbname=inventory_system',
-            'username' => 'yii2user',
-            'password' => 'yii2pass',
+            'dsn' => 'mysql:host=' . (getenv('DB_HOST') ?: 'localhost') . ';dbname=' . (getenv('DB_NAME') ?: 'inventory_system'),
+            'username' => getenv('DB_USER') ?: 'yii2user',
+            'password' => getenv('DB_PASSWORD') ?: 'yii2pass',
             'charset' => 'utf8mb4',
             'enableSchemaCache' => true,
             'schemaCacheDuration' => 60,

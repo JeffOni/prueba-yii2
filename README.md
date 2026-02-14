@@ -62,78 +62,25 @@ git clone https://github.com/JeffOni/prueba-yii2.git
 cd prueba-yii2
 ```
 
-### 2. Configurar Variables de Entorno
-
-Copiar el archivo de ejemplo y ajustar según sea necesario:
+### 2. Levantar el Stack con Docker
 
 ```bash
-cp .env.example .env
+docker compose up
 ```
 
-Contenido de `.env`:
+Este único comando se encarga de todo automáticamente:
 
-```bash
-# Configuración de Base de Datos
-DB_HOST=mysql
-DB_NAME=inventory_system
-DB_USER=yii2user
-DB_PASSWORD=yii2pass
+- Construye las imágenes con **multi-stage build** (instala dependencias Composer, inicializa Yii2)
+- Levanta MySQL 8.0 con healthcheck
+- Espera a que MySQL esté listo antes de continuar
+- Ejecuta las migraciones RBAC (tablas de roles y permisos)
+- Ejecuta las migraciones de la aplicación (user, product, audit_log)
+- Ejecuta los seeders (usuario admin, roles, productos de ejemplo)
+- Inicia Apache para backend y frontend
 
-# Usuario Administrador
-ADMIN_EMAIL=admin@example.com
-ADMIN_USERNAME=admin
-ADMIN_PASSWORD=Admin123!
+**No se requiere** copiar `.env`, ejecutar `composer install`, ni correr migraciones manualmente. Todo tiene valores por defecto para entornos de prueba/local.
 
-# JWT (para API opcional)
-JWT_SECRET_KEY=your-jwt-secret-key-here
-JWT_EXPIRE_TIME=3600
-```
-
-### 3. Iniciar Contenedores Docker
-
-```bash
-docker-compose up -d
-```
-
-Esto iniciará los siguientes servicios:
-
-- **Backend**: http://localhost:21080 (Panel de administración)
-- **Frontend**: http://localhost:20080 (Aplicación pública)
-- **phpMyAdmin**: http://localhost:8080 (Gestión de base de datos)
-- **MySQL**: Puerto 3306
-
-### 4. Instalar Dependencias
-
-```bash
-docker-compose exec backend composer install
-```
-
-### 5. Ejecutar Migraciones
-
-#### Crear tablas del sistema
-
-```bash
-docker-compose exec backend php yii migrate --interactive=0
-```
-
-#### Crear tablas de RBAC
-
-```bash
-docker-compose exec backend php yii migrate --migrationPath=@yii/rbac/migrations --interactive=0
-```
-
-### 6. Ejecutar Seeders
-
-Los seeders se ejecutan automáticamente con las migraciones e incluyen:
-
-- ✅ Usuario administrador (admin/Admin123!)
-- ✅ Roles y permisos RBAC (Admin, Editor, Viewer)
-- ✅ 15 productos de ejemplo
-- ✅ Asignación del rol Admin al usuario administrador
-
-## ⚙️ Configuración
-
-### Acceso a los Servicios
+### Servicios disponibles
 
 | Servicio           | URL                    | Puerto |
 | ------------------ | ---------------------- | ------ |
@@ -142,12 +89,19 @@ Los seeders se ejecutan automáticamente con las migraciones e incluyen:
 | phpMyAdmin         | http://localhost:8080  | 8080   |
 | MySQL              | localhost:3306         | 3306   |
 
-### phpMyAdmin
+### Variables de entorno (opcionales)
 
-- **Servidor**: mysql
-- **Usuario**: yii2user
-- **Contraseña**: yii2pass
-- **Base de datos**: inventory_system
+Todas las variables tienen **valores por defecto**. Si se necesita personalizar, crear un archivo `.env` en la raíz (ver `.env.example`):
+
+```bash
+DB_HOST=mysql                    # default: mysql
+DB_NAME=inventory_system         # default: inventory_system
+DB_USER=yii2user                 # default: yii2user
+DB_PASSWORD=yii2pass             # default: yii2pass
+MYSQL_ROOT_PASSWORD=verysecret   # default: verysecret
+JWT_SECRET_KEY=your-key-here     # default: your-jwt-secret-key-here
+JWT_EXPIRE_TIME=3600             # default: 3600
+```
 
 ## 🗄️ Base de Datos
 
@@ -378,7 +332,8 @@ prueba-yii2/
 │   │   ├── product/
 │   │   ├── user/
 │   │   └── layouts/
-│   └── web/                    # Assets públicos
+│   ├── web/                    # Assets públicos
+│   └── Dockerfile              # Multi-stage build para backend
 ├── common/                     # Código compartido
 │   ├── config/                 # Configuraciones compartidas
 │   ├── models/                 # Modelos compartidos
@@ -394,8 +349,17 @@ prueba-yii2/
 │   │   └── m260206_223424_seed_sample_products.php
 │   └── controllers/            # Comandos de consola
 ├── frontend/                   # Aplicación pública
-├── docker-compose.yml          # Configuración de Docker
+│   └── Dockerfile              # Multi-stage build para frontend
+├── docker/
+│   └── mysql/
+│       └── init.sql            # Script de inicialización de MySQL
+├── environments/               # Configuraciones por entorno (dev/prod)
+├── docker-compose.yml          # Orquestación de servicios Docker
+├── docker-entrypoint.sh        # Script de inicialización (migraciones, Apache)
+├── .dockerignore               # Exclusiones del build context
 ├── .env.example                # Plantilla de variables de entorno
+├── composer.json               # Dependencias PHP
+├── composer.lock               # Versiones fijas de dependencias
 └── README.md                   # Este archivo
 ```
 
@@ -471,12 +435,15 @@ docker-compose exec backend php yii migrate --migrationPath=@yii/rbac/migrations
 
 ## 📝 Notas Importantes
 
-1. **Protección del Usuario Admin**: El usuario admin principal (ID: 1) no puede ser eliminado desde la interfaz.
-2. **Soft Delete**: Los usuarios eliminados mantienen su registro en la base de datos con `status=0`.
-3. **Auditoría**: Todos los cambios en roles y usuarios son registrados automáticamente.
-4. **Validaciones**: El sistema implementa validaciones tanto del lado del servidor como del cliente.
-5. **CSRF**: Todas las acciones POST/DELETE están protegidas contra CSRF.
-6. **Pretty URLs**: Las URLs no incluyen `index.php` gracias a la configuración del urlManager.
+1. **Docker Compose**: El comando `docker compose up` levanta todo el stack automáticamente (build, migraciones, seeders). No requiere pasos manuales ni archivo `.env`.
+2. **Multi-stage Build**: Los Dockerfiles usan multi-stage build para optimizar las imágenes (stage builder + stage production).
+3. **Variables de entorno**: Todas tienen valores por defecto (fallbacks) para entornos de prueba/local, configurables via `.env` si se necesita.
+4. **Protección del Usuario Admin**: El usuario admin principal (ID: 1) no puede ser eliminado desde la interfaz.
+5. **Soft Delete**: Los usuarios eliminados mantienen su registro en la base de datos con `status=0`.
+6. **Auditoría**: Todos los cambios en roles y usuarios son registrados automáticamente.
+7. **Validaciones**: El sistema implementa validaciones tanto del lado del servidor como del cliente.
+8. **CSRF**: Todas las acciones POST/DELETE están protegidas contra CSRF.
+9. **Pretty URLs**: Las URLs no incluyen `index.php` gracias a la configuración del urlManager.
 
 ## 🔧 Solución de Problemas
 

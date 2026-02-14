@@ -1,18 +1,17 @@
 services:
   frontend:
     build:
-      context: frontend
+      context: .
+      dockerfile: frontend/Dockerfile
       args:
         - PHP_VERSION=8.2
     ports:
       - "20080:80"
-    volumes:
-      - ~/.composer-docker/cache:/root/.composer/cache:delegated
-      - ./:/app
     depends_on:
       mysql:
         condition: service_healthy
     environment:
+      - APP_TYPE=frontend
       - DB_HOST=mysql
       - DB_NAME=${DB_NAME:-inventory_system}
       - DB_USER=${DB_USER:-yii2user}
@@ -21,27 +20,20 @@ services:
       - JWT_EXPIRE_TIME=${JWT_EXPIRE_TIME:-3600}
     networks:
       - yii2-network
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost/"]
-      interval: 30s
-      timeout: 3s
-      retries: 3
-      start_period: 40s
 
   backend:
     build:
-      context: backend
+      context: .
+      dockerfile: backend/Dockerfile
       args:
         - PHP_VERSION=8.2
     ports:
       - "21080:80"
-    volumes:
-      - ~/.composer-docker/cache:/root/.composer/cache:delegated
-      - ./:/app
     depends_on:
       mysql:
         condition: service_healthy
     environment:
+      - APP_TYPE=backend
       - DB_HOST=mysql
       - DB_NAME=${DB_NAME:-inventory_system}
       - DB_USER=${DB_USER:-yii2user}
@@ -50,12 +42,6 @@ services:
       - JWT_EXPIRE_TIME=${JWT_EXPIRE_TIME:-3600}
     networks:
       - yii2-network
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost/"]
-      interval: 30s
-      timeout: 3s
-      retries: 3
-      start_period: 40s
 
   mysql:
     image: mysql:8.0
@@ -73,10 +59,19 @@ services:
     networks:
       - yii2-network
     healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u${DB_USER:-yii2user}", "-p${DB_PASSWORD:-yii2pass}"]
+      test:
+        [
+          "CMD",
+          "mysqladmin",
+          "ping",
+          "-h",
+          "localhost",
+          "-uyii2user",
+          "-pyii2pass",
+        ]
       interval: 10s
       timeout: 5s
-      retries: 5
+      retries: 10
       start_period: 30s
 
   adminer:

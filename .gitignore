@@ -71,9 +71,10 @@ phpunit.phar
 
 # docker volumes
 /docker/mysql/data
+.docker-init-lock
 
-# composer lock file (opcional: descomentar si quieres versionarlo)
-composer.lock
+# composer lock file (versionado para builds reproducibles en Docker)
+# composer.lock
 
 # archivos temporales de Claude Code
 tmpclaude-*
